@@ -1,0 +1,2 @@
+set(seer_MESSAGE_FILES "/home/pikachu/catkin_ws/src/Seer/msg/AprilTag.msg;/home/pikachu/catkin_ws/src/Seer/msg/AprilTagList.msg")
+set(seer_SERVICE_FILES "")

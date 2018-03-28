@@ -1,0 +1,8 @@
+prefix=/home/pikachu/catkin_ws/install
+
+Name: seer
+Description: Description of seer
+Version: 0.0.0
+Cflags: -I/home/pikachu/catkin_ws/install/include
+Libs: -L/home/pikachu/catkin_ws/install/lib 
+Requires: roscpp sensor_msgs message_runtime
