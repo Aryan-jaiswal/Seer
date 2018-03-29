@@ -770,9 +770,9 @@ int main(int argc, char** argv) {
   while ((c = popt.getNextOpt()) >= 0) {
   }
   message_filters::Subscriber<sensor_msgs::Image> sub_img_left(
-      nh, "/usb_cam/image_raw", 1);
+      nh, "/camera1/usb_cam/image_raw", 1);
   message_filters::Subscriber<sensor_msgs::Image> sub_img_right(
-      nh, "/usb_cam2/image_raw", 1);
+      nh, "/camera2/usb_cam2/image_raw", 1);
   typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::Image, sensor_msgs::Image> SyncPolicy;
   message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(10), sub_img_left,

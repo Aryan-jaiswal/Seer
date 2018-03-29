@@ -121,15 +121,7 @@ target_link_libraries(aruco_tag_node
   aruco 
   opencv_calib3d
 )
-add_executable(aruco_tag_node1 src/aruco_tag_node2.cpp src/rigidtransform.cc)
-target_link_libraries(aruco_tag_node1
-  ${catkin_LIBRARIES} 
-  ${OpenCV_LIBRARIES} 
-  popt 
-  config++ 
-  aruco 
-  opencv_calib3d
-)
+
 
 #add_executable(publisher src/publisher.cpp)
 #target_link_libraries(publisher ${catkin_LIBRARIES} aruco opencv_calib3d)

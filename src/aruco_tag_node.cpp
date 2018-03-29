@@ -165,7 +165,7 @@ public:
   		msg.pose.orientation.z = quat_data.z;
 
 
-  		std::cout << quat_data.w << "," << quat_data.x << std::endl;       //for debugging
+  		//std::cout << quat_data.w << "," << quat_data.x << std::endl;       //for debugging
   		mocap.publish(msg);
   		seq += 1;
   		//////////////////////////////////////////////////////////
@@ -221,35 +221,51 @@ public:
     	TheMarkersL = MDetector->detect(image_grayL, TheCameraParameters, tag_size);
     	TheMarkersR = MDetector->detect(image_grayR, TheCameraParameters, tag_size);
 
-      image_grayR.copyTo(TheInputImageCopy);
+      image_grayR.copyTo(TheInputImageCopyR);
+      image_grayL.copyTo(TheInputImageCopyL);
 
-            if (iShowAllCandidates){
-                auto candidates=MDetector->getCandidates();
-                for(auto cand:candidates)
-                    aruco::Marker(cand,-1).draw(TheInputImageCopy, Scalar(255, 0, 255));
-            }
+    // if (iShowAllCandidates){
+    //     auto candidates=MDetector->getCandidates();
+    //     for(auto cand:candidates) {
+    //         aruco::Marker(cand,-1).draw(TheInputImageCopyR, Scalar(255, 0, 255));
+    //         aruco::Marker(cand,-1).draw(TheInputImageCopyL, Scalar(255, 0, 255));
+    //       }
+    // }
 
-            for (unsigned int i = 0; i < TheMarkersR.size(); i++)
-            {
-                cout << TheMarkersR[i] << endl;
-                TheMarkersR[i].draw(TheInputImageCopy, Scalar(0, 0, 255),2,true);
-            }
+    // for (unsigned int i = 0; i < TheMarkersR.size(); i++)
+    // {
+    //     cout << TheMarkersR[i] << endl;
+    //     TheMarkersR[i].draw(TheInputImageCopyR, Scalar(0, 0, 255),2,true);
+    // }
+    //    for (unsigned int i = 0; i < TheMarkersL.size(); i++)
+    // {
+    //     cout << TheMarkersR[i] << endl;
+    //     TheMarkersL[i].draw(TheInputImageCopyL, Scalar(0, 0, 255),2,true);
+    // }
 
-            // draw a 3d cube in each marker if there is 3d info
-            // if (TheCameraParameters.isValid() && tag_size > 0)
-            //     for (unsigned int i = 0; i < TheMarkersR.size(); i++)
-            //     {
-            //         CvDrawingUtils::draw3dCube(TheInputImageCopy, TheMarkersR[i], TheCameraParameters);
-            //         CvDrawingUtils::draw3dAxis(TheInputImageCopy, TheMarkersR[i], TheCameraParameters);
-            //     }
 
-      cout<<"Size: "<<TheMarkersR.size();
-      cout<<"SizeL: "<<TheMarkersL.size();
+    // draw a 3d cube in each marker if there is 3d info
+      for (unsigned int i = 0; i < TheMarkersR.size(); i++)
+      {
+          aruco::CvDrawingUtils::draw3dCube(TheInputImageCopyR, TheMarkersR[i], TheCameraParameters);
+          aruco::CvDrawingUtils::draw3dAxis(TheInputImageCopyR, TheMarkersR[i], TheCameraParameters);
+      }
+     
+      
+      for (unsigned int i = 0; i < TheMarkersL.size(); i++)
+      {
+          aruco::CvDrawingUtils::draw3dCube(TheInputImageCopyL, TheMarkersL[i], TheCameraParameters);
+          aruco::CvDrawingUtils::draw3dAxis(TheInputImageCopyL, TheMarkersL[i], TheCameraParameters);
+      }
+      \
+      cv::imshow("Right_Detected",TheInputImageCopyR);
+      cv::imshow("Left_Detected",TheInputImageCopyL);
+      // cout<<"Size: "<<TheMarkersR.size();
+      // cout<<"SizeL: "<<TheMarkersL.size();
     	double positionL[3];   //stores the position from left camera 
     	double orientationL[4];  //stores the quaternion
     	double positionR[3];   //stores the position from right camera
     	double orientationR[4];  //stores the quaternion
-    	cout<<"Is markers detected"<<endl;
     	if (TheMarkersR.size() > 0 && TheMarkersL.size() > 0) {
 
     		Eigen::Vector3d translationL, translationR;
@@ -264,36 +280,34 @@ public:
 
     			Setting &Matrix = root["Matrix"];
 
-    			cout<<"Matrix created"<<endl;
-          cout<<"Press key"<<endl;
     			if(key != 27) {
 
 
-            cout<<"Key pressed"<<endl;
+          
     				TheMarkersL[0].OgreGetPoseParameters(positionL,orientationL);
     				/*
     				*Converting from double array to Eigen3d and pushing as vector of eigen_vectors
     				*/
     				double* ptrL = &positionL[0];   //pointer to the first position
     				std::vector<double> v_positionL(ptrL , ptrL + 3);   //double array to vector of doubles
-				double* v_ptrL = &v_positionL[0];
-				Eigen::Map<Eigen::Vector3d> translationL(v_ptrL, 3);   //mapping from vevtor of doubles to eigen Vector3d
-					pos1.push_back(Eigen::Vector3d(translationL(1), -translationL(2), 3.517- translationL(0)));        //converting to camera coordinate axes and making origin as ground
+    				double* v_ptrL = &v_positionL[0];
+    				Eigen::Map<Eigen::Vector3d> translationL(v_ptrL, 3);   //mapping from vevtor of doubles to eigen Vector3d
+  					pos1.push_back(Eigen::Vector3d(translationL(0 ), -translationL(1), 3.517- translationL(2)));       //converting to camera coordinate axes and making origin as ground
 
-					TheMarkersR[0].OgreGetPoseParameters(positionR,orientationR);
+  					TheMarkersR[0].OgreGetPoseParameters(positionR,orientationR);
       				/*
       				*Converting from double array to Eigen3d and pushing as vector of eigen_vectors
       				*/
       				double* ptrR = &positionR[0];   //pointer to the first position
       				std::vector<double> v_positionR(ptrR , ptrR + 3);   //double array to vector of doubles
-					double* v_ptrR = &v_positionR[0];
-					Eigen::Map<Eigen::Vector3d> translationR(v_ptrR , 3);   //mapping from vevtor of doubles to eigen Vector3d
-					pos2.push_back(Eigen::Vector3d(translationR(1), -translationR(2), 3.517- translationR(0)));        //converting to camera coordinate axes and making origin as ground
-					
-					ROS_INFO("Grabbed a set of points");
+    					double* v_ptrR = &v_positionR[0];
+    					Eigen::Map<Eigen::Vector3d> translationR(v_ptrR , 3);   //mapping from vevtor of doubles to eigen Vector3d
+    					pos2.push_back(Eigen::Vector3d(translationR(0), -translationR(1), 3.517- translationR(2)));        //converting to camera coordinate axes and making origin as ground
+    					
+    					ROS_INFO("Grabbed a set of points");
 
 				}
-				else {
+				else  {
 					TransformType RT = computeRigidTransform(pos1, pos2);
 
 					std::cout << RT.first << endl; 
@@ -310,7 +324,7 @@ public:
 				        T.add(Setting::TypeFloat) = (RT.second)[i];
 					}
 					cfg.writeFile(file);
-          			cerr<<"New Configuration successfully written to: "<<file <<endl;
+          cerr<<"New Configuration successfully written to: "<<file <<endl;
 
           			pos1.clear();
           			pos2.clear();
@@ -320,7 +334,7 @@ public:
 		}
 		 void calib_error(char key, Mat& image_grayL, Mat& image_grayR) {
 
-		 	float resize_factor = 1;
+		 	//float resize_factor = 1;
 		 	iDictionaryIndex = (uint64_t)aruco::Dictionary::getTypeFromString(dictionaryString);
 		 	MDetector->setDictionary(dictionaryString,float(iCorrectionRate)/10.0 );  // sets the dictionary to be employed (ARUCO,APRILTAGS,ARTOOLKIT,etc)
          	iThreshold = MDetector->getParameters().ThresHold;
@@ -336,44 +350,65 @@ public:
         	TheMarkersL = MDetector->detect(image_grayL, TheCameraParameters, tag_size);
         	TheMarkersR = MDetector->detect(image_grayR, TheCameraParameters, tag_size);
 
+          image_grayR.copyTo(TheInputImageCopyR);
+          image_grayL.copyTo(TheInputImageCopyL);
+
+
+          // draw a 3d cube in each marker if there is 3d info
+            for (unsigned int i = 0; i < TheMarkersR.size(); i++)
+            {
+                aruco::CvDrawingUtils::draw3dCube(TheInputImageCopyR, TheMarkersR[i], TheCameraParameters);
+                aruco::CvDrawingUtils::draw3dAxis(TheInputImageCopyR, TheMarkersR[i], TheCameraParameters);
+            }
+           
+            
+            for (unsigned int i = 0; i < TheMarkersL.size(); i++)
+            {
+                aruco::CvDrawingUtils::draw3dCube(TheInputImageCopyL, TheMarkersL[i], TheCameraParameters);
+                aruco::CvDrawingUtils::draw3dAxis(TheInputImageCopyL, TheMarkersL[i], TheCameraParameters);
+            }
+            \
+            cv::imshow("Right_Detected",TheInputImageCopyR);
+            cv::imshow("Left_Detected",TheInputImageCopyL);
+
         	if (TheMarkersR.size() > 0 && TheMarkersL.size() > 0) {
 
         		Eigen::Vector3d translationL, translationR;
         		Eigen::Matrix3d rotationL, rotationR;	
 
-        		static const char *file ="/home/ash/T_matrix.cfg";
+        		static const char *file ="/home/ash/catkin_ws/src/Seer/T_matrix.cfg";
         		Config cfg;
         		try {
           			cfg.readFile(file);
         		}
         		catch(const FileIOException &fioex) {
-          			std::cerr<<"I/O error while reading file 555F"<<endl;
+          			std::cerr<<"I/O error while reading file"<<endl;
           			return;
           		}
 
           		if(key != 27) {
 
           			TheMarkersL[0].OgreGetPoseParameters( positionL, orientationL);
-      				/*
-      				*Converting from double array to Eigen3d and pushing as vector of eigen_vectors
-      				*/
-      				double* ptrL = &positionL[0];   //pointer to the first position
-      				std::vector<double> v_positionL(ptrL , ptrL + 3);   //double array to vector of doubles
-					double* v_ptrL = &v_positionL[0];
-					Eigen::Map<Eigen::Vector3d> translationL(v_ptrL, 3);   //mapping from vevtor of doubles to eigen Vector3d
-					pos1.push_back(Eigen::Vector3d(translationL(1), -translationL(2), 3.517- translationL(0)));        //converting to camera coordinate axes and making origin as ground
+        				/*
+        				*Converting from double array to Eigen3d and pushing as vector of eigen_vectors
+        				*/
+        				double* ptrL = &positionL[0];   //pointer to the first position
+        				std::vector<double> v_positionL(ptrL , ptrL + 3);   //double array to vector of doubles
+      					double* v_ptrL = &v_positionL[0];
+      					Eigen::Map<Eigen::Vector3d> translationL(v_ptrL, 3);   //mapping from vevtor of doubles to eigen Vector3d
+      					pos1.push_back(Eigen::Vector3d(translationL(0), -translationL(1), 3.517- translationL(2)));        //converting to camera coordinate axes and making origin as ground
 
-					TheMarkersR[0].OgreGetPoseParameters(positionR, orientationR);
-      				/*
-      				*Converting from double array to Eigen3d and pushing as vector of eigen_vectors
+  				    	TheMarkersR[0].OgreGetPoseParameters(positionR, orientationR);
+        				/*
+        				*Converting from double array to Eigen3d and pushing as vector of eigen_vectors
       				*/
-      				double* ptrR = &positionR[0];   //pointer to the first position
-      				std::vector<double> v_positionR(ptrR , ptrR + 3);   //double array to vector of doubles
-					double* v_ptrR = &v_positionR[0];
-					Eigen::Map<Eigen::Vector3d> translationR(v_ptrR , 3);   //mapping from vevtor of doubles to eigen Vector3d
-					pos2.push_back(Eigen::Vector3d(translationR(1), -translationR(2), 3.517- translationR(0)));        //converting to camera coordinate axes and making origin as ground
-					
-					ROS_INFO("Grabbed a set of points");
+      				  double* ptrR = &positionR[0];   //pointer to the first position
+        				std::vector<double> v_positionR(ptrR , ptrR + 3);   //double array to vector of doubles
+      					double* v_ptrR = &v_positionR[0];
+      					Eigen::Map<Eigen::Vector3d> translationR(v_ptrR , 3);   //mapping from vevtor of doubles to eigen Vector3d
+      					pos2.push_back(Eigen::Vector3d(translationR(0), -translationR(1), 3.517- translationR(2)));        //converting to camera coordinate axes and making origin as ground
+      					
+					       ROS_INFO("Grabbed a set of points");
 
           		}
           		else {
@@ -427,7 +462,7 @@ public:
 */
 		 void pixhawk( Mat& image_grayL, Mat& image_grayR ) {          
 
-		 	float resize_factor = 1;
+		 	//float resize_factor = 1;
 		 	iDictionaryIndex = (uint64_t)aruco::Dictionary::getTypeFromString(dictionaryString);
 		 	MDetector->setDictionary(dictionaryString,float(iCorrectionRate)/10.0 );  // sets the dictionary to be employed (ARUCO,APRILTAGS,ARTOOLKIT,etc)
          	iThreshold = MDetector->getParameters().ThresHold;
@@ -437,6 +472,28 @@ public:
 
         	TheMarkersL = MDetector->detect(image_grayL, TheCameraParameters, tag_size);
         	TheMarkersR = MDetector->detect(image_grayR, TheCameraParameters, tag_size);
+
+          image_grayR.copyTo(TheInputImageCopyR);
+          image_grayL.copyTo(TheInputImageCopyL);
+
+
+
+          // draw a 3d cube in each marker if there is 3d info
+          for (unsigned int i = 0; i < TheMarkersR.size(); i++)
+          {
+              aruco::CvDrawingUtils::draw3dCube(TheInputImageCopyR, TheMarkersR[i], TheCameraParameters);
+              aruco::CvDrawingUtils::draw3dAxis(TheInputImageCopyR, TheMarkersR[i], TheCameraParameters);
+          }
+         
+          
+          for (unsigned int i = 0; i < TheMarkersL.size(); i++)
+          {
+              aruco::CvDrawingUtils::draw3dCube(TheInputImageCopyL, TheMarkersL[i], TheCameraParameters);
+              aruco::CvDrawingUtils::draw3dAxis(TheInputImageCopyL, TheMarkersL[i], TheCameraParameters);
+          }
+          cv::imshow("Right_Detected",TheInputImageCopyR);
+          cv::imshow("Left_Detected",TheInputImageCopyL);
+
           double positionL[3];   //stores the position from left camera 
           double orientationL[4];  //stores the quaternion
           double positionR[3];   //stores the position from right camera
@@ -448,22 +505,24 @@ public:
 
         	if (TheMarkersR.size() > 0 && TheMarkersL.size() == 0) {
 
-        		TheMarkersR[0].OgreGetPoseParameters( positionR, orientationR);
-      				/*
-      				*Converting from double array to Eigen3d and pushing as vector of eigen_vectors
-      				*/
-      				double* ptrR = &positionR[0];   //pointer to the first position
-      				std::vector<double> v_positionR(ptrR , ptrR + 3);   //double array to vector of doubles
-					double* v_ptrR = &v_positionR[0];
-					Eigen::Map<Eigen::Vector3d> translationR(v_ptrR , 3);   //mapping from vevtor of doubles to eigen Vector3d
-					pos2.push_back(Eigen::Vector3d(translationR(1), -translationR(2), 3.517- translationR(0)));        //converting to camera coordinate axes and making origin as ground
 
-					poseCallback( positionR[0], positionR[1], positionR[2] );
+        		TheMarkersR[0].OgreGetPoseParameters( positionR, orientationR);
+    				/*
+    				*Converting from double array to Eigen3d and pushing as vector of eigen_vectors
+    				*/
+    				double* ptrR = &positionR[0];   //pointer to the first position
+    				std::vector<double> v_positionR(ptrR , ptrR + 3);   //double array to vector of doubles
+  					double* v_ptrR = &v_positionR[0];
+  					Eigen::Map<Eigen::Vector3d> translationR(v_ptrR , 3);   //mapping from vevtor of doubles to eigen Vector3d
+  					pos2.push_back(Eigen::Vector3d(translationR(0), -translationR(1), 3.517- translationR(2)));        //converting to camera coordinate axes and making origin as ground
+
+  					poseCallback( positionR[0], -positionR[1],3.517 - positionR[2] );
+            pos2.clear();
 
 				  }
   			   else if (TheMarkersR.size() == 0 && TheMarkersL.size() > 0 ) {
 
-  				    static const char *file ="/home/ash/T_matrix.cfg";
+  				    static const char *file ="//home/ash/catkin_ws/src/Seer/T_matrix.cfg";
   		        Config cfg;
   		        try
   		        {
@@ -481,11 +540,11 @@ public:
       			*/
       			double* ptrL = &positionL[0];   //pointer to the first position
       			std::vector<double> v_positionL(ptrL , ptrL + 3);   //double array to vector of doubles
-				double* v_ptrL = &v_positionL[0];
-				Eigen::Map<Eigen::Vector3d> translationL(v_ptrL, 3);   //mapping from vevtor of doubles to eigen Vector3d
-				pos1.push_back(Eigen::Vector3d(translationL(1), -translationL(2), 3.517- translationL(0)));        //converting to camera coordinate axes and making origin as ground
+    				double* v_ptrL = &v_positionL[0];
+    				Eigen::Map<Eigen::Vector3d> translationL(v_ptrL, 3);   //mapping from vevtor of doubles to eigen Vector3d
+    				pos1.push_back(Eigen::Vector3d(translationL(0), -translationL(1), 3.517- translationL(2)));        //converting to camera coordinate axes and making origin as ground
 
-				vector<float> r1,r2,r3,t;
+				    vector<float> r1,r2,r3,t;
 	            //float error;
 	            Eigen::Matrix3d R;
 	            Eigen::Vector3d T;
@@ -521,7 +580,10 @@ public:
               pos2_calc.push_back(V);
 
               poseCallback(pos2_calc[cnt][0] ,pos2_calc[cnt][1] ,pos2_calc[cnt][2] );
+
               cnt++;
+              pos1.clear();
+              //pos2_calc.clear();
           }
           else if(TheMarkersR.size() > 0 && TheMarkersL.size() > 0) {
 
@@ -531,21 +593,22 @@ public:
       			*/
       			double* ptrL = &positionL[0];   //pointer to the first position
       			std::vector<double> v_positionL(ptrL , ptrL + 3);   //double array to vector of doubles
-				double* v_ptrL = &v_positionL[0];
-				Eigen::Map<Eigen::Vector3d> translationL(v_ptrL, 3);   //mapping from vevtor of doubles to eigen Vector3d
-				pos1.push_back(Eigen::Vector3d(translationL(1), -translationL(2), 3.517- translationL(0)));        //converting to camera coordinate axes and making origin as ground
-
-				TheMarkersR[0].OgreGetPoseParameters( positionR, orientationR);
-      			/*
+    				double* v_ptrL = &v_positionL[0];
+    				Eigen::Map<Eigen::Vector3d> translationL(v_ptrL, 3);   //mapping from vevtor of doubles to eigen Vector3d
+    				pos1.push_back(Eigen::Vector3d(translationL(0), -translationL(1), 3.517- translationL(2)));        //converting to camera coordinate axes and making origin as ground
+    				TheMarkersR[0].OgreGetPoseParameters( positionR, orientationR);
+          			/*
       			*Converting from double array to Eigen3d and pushing as vector of eigen_vectors
       			*/
       			double* ptrR = &positionR[0];   //pointer to the first position
       			std::vector<double> v_positionR(ptrR , ptrR + 3);   //double array to vector of doubles
-				double* v_ptrR = &v_positionR[0];
-				Eigen::Map<Eigen::Vector3d> translationR(v_ptrR , 3);   //mapping from vevtor of doubles to eigen Vector3d
-				pos2.push_back(Eigen::Vector3d(translationR(1), -translationR(2), 3.517- translationR(0)));        //converting to camera coordinate axes and making origin as ground
+    				double* v_ptrR = &v_positionR[0];
+    				Eigen::Map<Eigen::Vector3d> translationR(v_ptrR , 3);   //mapping from vevtor of doubles to eigen Vector3d
+    				pos2.push_back(Eigen::Vector3d(translationR(0), -translationR(1), 3.517- translationR(2)));        //converting to camera coordinate axes and making origin as ground
 
-				poseCallback( positionR[0], positionR[1], positionR[2] );
+    				poseCallback( positionR[0], -positionR[1], 3.517 - positionR[2] );
+            pos1.clear();
+            pos2.clear();
           }
           return;
       }
@@ -611,16 +674,18 @@ public:
 	    /////////////////////////////////////
 	    else if(m_mode == 2)
 	    {
-	      cv::cvtColor(tmpL, image_grayL, CV_BGR2GRAY);
-	      cv::cvtColor(tmpR, image_grayR, CV_BGR2GRAY);
+	     // cv::cvtColor(tmpL, image_grayL, CV_BGR2GRAY);
+	     //cv::cvtColor(tmpR, image_grayR, CV_BGR2GRAY);
 
-	      imshow("Left_Input", image_grayL);
-	      imshow("Right_Input", image_grayR);
+	      imshow("Left_Input", tmpL);
+	      imshow("Right_Input", tmpR);
 	      char key = (char)cv::waitKey(30);
 	      //if(key > 0)
-	      	pixhawk( image_grayL, image_grayR);
+	      	pixhawk(tmpL, tmpR);
 	      //}
 	  }
+    else 
+      delete MDetector;
 	}
 
 
@@ -636,7 +701,7 @@ private:
     //aruco::VideoCapture TheVideoCapturer;
     vector<aruco::Marker> TheMarkersL;
     vector<aruco::Marker> TheMarkersR;
-    Mat TheInputImage,TheInputImageGrey, TheInputImageCopy;
+    Mat TheInputImage,TheInputImageGrey, TheInputImageCopyR, TheInputImageCopyL;
 
     aruco::CameraParameters TheCameraParameters;   //stores the parameters ;)
     double camera_focal_length_x;  // in pixels. 
