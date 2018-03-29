@@ -46,10 +46,9 @@
   <build_depend>cv_bridge</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>message_generation</build_depend>
-<<<<<<< HEAD
   <build_depend>tf</build_depend>
-=======
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
+
 
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
@@ -57,10 +56,8 @@
   <run_depend>cv_bridge</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>message_runtime</run_depend>
-<<<<<<< HEAD
   <run_depend>tf</run_depend>
-=======
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

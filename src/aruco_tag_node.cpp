@@ -76,12 +76,13 @@ public:
 			                                  570.0);
 			private_node_handle.param<bool>("show_debug_image", show_debug_image,
 			                                false);
-			private_node_handle.param<double>("tag_size_cm", tag_size, 10.5);
+			private_node_handle.param<double>("tag_size_cm", tag_size, 13.25);
 			private_node_handle.param<string>("Dictionary_String", dictionaryString, "ARUCO_MIP_36h12");
 
 			camera_focal_length_y = camera_focal_length_x;  // hard_coded,calibrate your camera and edit it.:p
 
-			TheCameraParameters.readFromXMLFile("/home/aryan/catkin_ws/src/Seer/seer_cam.yml");         //write the path to your param file here
+			TheCameraParameters.readFromXMLFile("/home/ash/catkin_ws/src/Seer/seer_cam.yml");         //write the path to your param file here
+      tag_size = 13.25;
 			tag_size = tag_size/100;   //to get real world coordinates in metres
 			iCorrectionRate = 0;
 			iMinMarkerSize = 0;
@@ -145,8 +146,13 @@ public:
   		static tf::TransformBroadcaster br;
   		tf::Transform transform;           //publish position and orientation
   		transform.setOrigin( tf::Vector3(a,b,c) );
-  		tf::Quaternion q;
-  		geometry_msgs::PoseStamped msg;     //message type for mocap
+      //////////////////////////////////////////////////////////////////////////////////////////////////
+      /////hardcoding this as we will take data from IMU for mocap..Just for  visualising the positiom//
+      /////////////////////////////////////////////////////////////////////////////////////////////////
+  		tf::Quaternion q = tf::createQuaternionFromRPY(0, 0, 0);   
+      q.normalize();
+      transform.setRotation(q);
+   		geometry_msgs::PoseStamped msg;     //message type for mocap
   		mocap = nh_.advertise<geometry_msgs::PoseStamped>("/mavros/mocap/pose",1);   //queue_size=1 to avoid any latency
   		msg.header.stamp = ros::Time::now();
   		msg.header.seq = seq;               //must increment every time message is published
@@ -157,6 +163,7 @@ public:
   		msg.pose.orientation.x = quat_data.x;
   		msg.pose.orientation.y = quat_data.y;
   		msg.pose.orientation.z = quat_data.z;
+
 
   		std::cout << quat_data.w << "," << quat_data.x << std::endl;       //for debugging
   		mocap.publish(msg);
@@ -248,7 +255,7 @@ public:
     		Eigen::Vector3d translationL, translationR;
   			Eigen::Matrix3d rotationL, rotationR ;
 
-  			static const char *file = "/home/aryan/catkin_ws/src/Seer/T_matrix.cfg";
+  			static const char *file = "/home/ash/catkin_ws/src/Seer/T_matrix.cfg";
   			Config cfg;
   			Setting &root = cfg.getRoot();
 
@@ -334,7 +341,7 @@ public:
         		Eigen::Vector3d translationL, translationR;
         		Eigen::Matrix3d rotationL, rotationR;	
 
-        		static const char *file ="/home/aryan/T_matrix.cfg";
+        		static const char *file ="/home/ash/T_matrix.cfg";
         		Config cfg;
         		try {
           			cfg.readFile(file);
@@ -456,7 +463,7 @@ public:
 				  }
   			   else if (TheMarkersR.size() == 0 && TheMarkersL.size() > 0 ) {
 
-  				    static const char *file ="/home/aryan/T_matrix.cfg";
+  				    static const char *file ="/home/ash/T_matrix.cfg";
   		        Config cfg;
   		        try
   		        {
@@ -554,7 +561,7 @@ public:
       dictionaryString = "ARUCO_MIP_36h12";
 	    if (TheCameraParameters.isValid()){
             TheCameraParameters.resize(tmpL.size());
-            cout<<"Valid!!"<<endl;
+           // cout<<"Valid!!"<<endl;
           }
       else
         cout<<"parameters not valid"<<endl;
@@ -610,9 +617,9 @@ public:
 	      imshow("Left_Input", image_grayL);
 	      imshow("Right_Input", image_grayR);
 	      char key = (char)cv::waitKey(30);
-	      if( key > 0) {
+	      //if(key > 0)
 	      	pixhawk( image_grayL, image_grayR);
-	      }
+	      //}
 	  }
 	}
 
@@ -664,8 +671,8 @@ int main(int argc , char ** argv) {
   ///////////////////////////////////////////////////
   //Subscribing to usb_cam_node for input image data//
   ////////////////////////////////////////////////////
-	message_filters::Subscriber<sensor_msgs::Image> sub_img_left(nh, "/usb_cam/image_raw", 1);
-	message_filters::Subscriber<sensor_msgs::Image> sub_img_right(nh, "/usb_cam2/image_raw", 1);
+	message_filters::Subscriber<sensor_msgs::Image> sub_img_left(nh, "/camera1/usb_cam/image_raw", 1);
+	message_filters::Subscriber<sensor_msgs::Image> sub_img_right(nh, "/camera2/usb_cam2/image_raw", 1);
 	/////////////////////////////////////////////////////
 	//Synchronising time between the the input images///
 	////////////////////////////////////////////////////

@@ -1,10 +1,4 @@
-<<<<<<< HEAD
 
-=======
-//
-// adapted from ros example and april tag examples - palash
-//
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
 #include <fstream>
 #include <ros/ros.h>
 #include <message_filters/subscriber.h>
@@ -24,35 +18,29 @@
 #include "seer/AprilTag.h"      // rosmsg
 #include "seer/AprilTagList.h"  // rosmsg
 #include "rigidtransform.h"
-<<<<<<< HEAD
 #include "KalmanFilter.h"
 #include <tf/transform_broadcaster.h>
 #include "geometry_msgs/PoseStamped.h"
 #include "sensor_msgs/Imu.h"
 
 std::string AprilTag;
-=======
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
 
 using std::ofstream;
 using namespace cv;
 using namespace std;
 using namespace libconfig;
-<<<<<<< HEAD
 using namespace Eigen;
 
-=======
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
 
 static const std::string OPENCV_WINDOW = "Image window";
 
 const double PI = 3.14159265358979323846;
 const double TWOPI = 2.0 * PI;
-<<<<<<< HEAD
 geometry_msgs::Quaternion quat_data;
-=======
 
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
+
 /**
  * Normalize angle to be within the interval [-pi,pi].
  */
@@ -80,7 +68,6 @@ void wRo_to_euler(const Eigen::Matrix3d& wRo, double& yaw, double& pitch,
 
 class AprilTagNode {
   ros::NodeHandle nh_;
-<<<<<<< HEAD
    int j=0 ,j1=0,cnt=0,seq=0;
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_;
@@ -88,12 +75,7 @@ class AprilTagNode {
   ros::Subscriber imu_data;
   ros::Publisher odom_pub_;
   ros::Publisher mocap;
-=======
-  image_transport::ImageTransport it_;
-  image_transport::Subscriber image_sub_;
-  image_transport::Publisher image_pub_;
-  ros::Publisher odom_pub_;
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
   // ros::Publisher tag_list_pub;
   AprilTags::TagDetector* tag_detector;
 
@@ -103,7 +85,6 @@ class AprilTagNode {
   double camera_focal_length_y;  // in pixels
   double tag_size;               // tag side length of frame in meters
   bool show_debug_image;
-<<<<<<< HEAD
   vector<Eigen::Vector3d> P1s, P2s,P2s_calc ,P3s,P4s;
   
 
@@ -141,44 +122,22 @@ class AprilTagNode {
 
   }
   int zz=0;
-  
-=======
-  vector<Eigen::Vector3d> P1s, P2s,P2s_calc;
-
-  /*int i,j;
-  config_t cfg,*cf;
-  for(i=0;i<3;i++)
-    for(j=0;j<3;j++)
-      config_setting_t *R = Eigen::Matrix3d::Constant(i,j,1.0);
-  config_setting_t *T = {0,0,0};
-  cf = &cfg;
-  config_init(cf);*/
-
-  // cv::Mat imgL;
-  // cv::Mat imgR;
-
- public:
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+ 
   AprilTagNode()
       : it_(nh_),
         tag_codes(AprilTags::tagCodes36h11),
         tag_detector(NULL),
-<<<<<<< HEAD
-        camera_focal_length_y(4),
-        camera_focal_length_x(4),
-=======
+
         camera_focal_length_y(414),
         camera_focal_length_x(414),
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
         tag_size(0.015),  // 1 1/8in marker = 0.029m
         show_debug_image(false) {
     // Subscrive to input video feed and publish output video feed
     //image_sub_ =
     //    it_.subscribe("/usb_cam/image_raw", 1, &AprilTagNode::imageCb, this);
-<<<<<<< HEAD
-     imu_data = nh_.subscribe("/mavros/imu/data", 1, &AprilTagNode::quaternion_data, this);
-=======
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+    imu_data = nh_.subscribe("/mavros/imu/data", 1, &AprilTagNode::quaternion_data, this);
+
     image_pub_ = it_.advertise("/seer_debug/output_video", 1);
     odom_pub_ = nh_.advertise<nav_msgs::Odometry>("/ground_truth", 1);
     // tag_list_pub = nh_.advertise<seer::AprilTagList>("/seers", 100);
@@ -187,13 +146,9 @@ class AprilTagNode {
     // be run simultaneously while using different parameters.
     ros::NodeHandle private_node_handle("~");
     private_node_handle.param<double>("focal_length_px", camera_focal_length_x,
-<<<<<<< HEAD
                                       570.0);
     private_node_handle.param<double>("tag_size_cm", tag_size, 16);
-=======
-                                      700.0);
-    private_node_handle.param<double>("tag_size_cm", tag_size, 2.9);
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
     private_node_handle.param<bool>("show_debug_image", show_debug_image,
                                     false);
 
@@ -217,16 +172,12 @@ class AprilTagNode {
       delete tag_detector;
     }
   }
-<<<<<<< HEAD
-  
-  
-=======
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
 
   float Eucl_distance(Eigen::Vector3d v1,Eigen::Vector3d v2){
     return sqrt(pow((v1[0]-v2[0]),2)+pow((v1[1]-v2[1]),2)+pow((v1[2]-v1[2]),2));
   }
-<<<<<<< HEAD
+
   void quaternion_data(const sensor_msgs::Imu::ConstPtr& msg){
     quat_data.w=msg->orientation.w;
     quat_data.x=msg->orientation.x;
@@ -503,15 +454,13 @@ l++;
 
 
 }
-=======
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
   void calibrate(char key, Mat& image_grayL, Mat& image_grayR) {
     vector<AprilTags::TagDetection> detectionsL =
         AprilTagNode::tag_detector->extractTags(image_grayL);
     vector<seer::AprilTag> tag_msgs;
     vector<AprilTags::TagDetection> detectionsR =
         tag_detector->extractTags(image_grayR);
-<<<<<<< HEAD
 
     //  vector<seer::AprilTag> tag_msgs;
     if (detectionsR.size() > 0 && detectionsL.size() > 0) {
@@ -524,14 +473,7 @@ F<<
 
 
       static const char *file ="/home/aryan/T_matrix.cfg";
-=======
-    //  vector<seer::AprilTag> tag_msgs;
-    if (detectionsR.size() > 0 && detectionsL.size() > 0) {
-      Eigen::Vector3d translationL, translationR;
-      Eigen::Matrix3d rotationL, rotationR;
 
-      static const char *file ="T_matrix.cfg";
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
       Config cfg;
       Setting &root=cfg.getRoot();
 
@@ -540,10 +482,8 @@ F<<
 
       Setting &Matrix=root["Matrix"];
 
-<<<<<<< HEAD
       cout<<"Matrix created"<<endl;
-=======
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
       if (key != 27) {
         //for (size_t i = 0; i < detectionsL.size(); i++) {
           detectionsL[0].getRelativeTranslationRotation(
@@ -552,20 +492,14 @@ F<<
               rotationL);
 
           P1s.push_back(Eigen::Vector3d(translationL(1), -translationL(2),
-<<<<<<< HEAD
                                          3.517- translationL(0)));
 
-=======
-                                        2.89698162598 - translationL(0)));
-        //}
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
         //for (size_t i = 0; i < detectionsR.size(); i++) {
           detectionsR[0].getRelativeTranslationRotation(
               tag_size, camera_focal_length_x, camera_focal_length_y,
               image_grayR.cols / 2, image_grayR.rows / 2, translationR,
               rotationR);
           P2s.push_back(Eigen::Vector3d(translationR(1), -translationR(2),
-<<<<<<< HEAD
                                          3.517- translationR(0)));
 
 //wRo_to_euler(f_rot_1,yaw,)
@@ -587,12 +521,7 @@ F<<
       //  cout<<j;
       } else {
       	cout<<"else"<<endl;
-=======
-                                        2.89698162598 - translationR(0)));
-        //}
-        ROS_INFO("Grabbed a set of points");
-      } else {
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
         TransformType RT = computeRigidTransform(P1s, P2s);
       //  if(config_read_file(&cfg,"T_matrix")==CONFIG_TRUE){
           std::cout << RT.first << endl;
@@ -637,22 +566,16 @@ F<<
         Eigen::Vector3d translationL, translationR;
         Eigen::Matrix3d rotationL, rotationR;
 
-<<<<<<< HEAD
         static const char *file ="/home/aryan/T_matrix.cfg";
-=======
-        static const char *file ="/home/pikachu/catkin_ws/T_matrix.cfg";
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
         Config cfg;
         try{
           cfg.readFile(file);
         }
         catch(const FileIOException &fioex)
         {
-<<<<<<< HEAD
           std::cerr<<"I/O error while reading file 555F"<<endl;
-=======
-          std::cerr<<"I/O error while reading file"<<endl;
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
           return;
         }
         //Setting& root=cfg.getRoot();
@@ -725,7 +648,6 @@ F<<
             }
 
             cout << endl;
-<<<<<<< HEAD
           
           }  
       }
@@ -755,19 +677,7 @@ void initializer(MatrixXf A,MatrixXf H,MatrixXf Q,MatrixXf R,MatrixXf X0,VectorX
  
   
 }
-=======
-          //  P1s.clear();
-            //P2s.clear();
-          }
-        //  cout<<"222"<<endl;
-        //}
-      }
-      //exit(EXIT_FAILURE);
-      return;
-    }
 
-
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
   void imgCallback(const sensor_msgs::ImageConstPtr& msg_left,
                    const sensor_msgs::ImageConstPtr& msg_right) {
     cv::Mat tmpL, tmpR, image_grayL, image_grayR;
@@ -786,11 +696,8 @@ void initializer(MatrixXf A,MatrixXf H,MatrixXf Q,MatrixXf R,MatrixXf X0,VectorX
 	      //calibrate(key, image_grayL, image_grayR);
         normal(key, image_grayL, image_grayR);
 	    }
-<<<<<<< HEAD
       //exit(EXIT_FAILURE);
-=======
-      exit(EXIT_FAILURE);
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
     }
     else if(m_mode == 0){
       cv::cvtColor(tmpL, image_grayL, CV_BGR2GRAY);
@@ -802,7 +709,6 @@ void initializer(MatrixXf A,MatrixXf H,MatrixXf Q,MatrixXf R,MatrixXf X0,VectorX
 	    if (key > 0) {
 	      calibrate(key, image_grayL, image_grayR);
 	    }
-<<<<<<< HEAD
     
     }
     else if(m_mode==2)
@@ -832,12 +738,7 @@ void initializer(MatrixXf A,MatrixXf H,MatrixXf Q,MatrixXf R,MatrixXf X0,VectorX
     }
   }
   
-=======
-      exit(EXIT_FAILURE);
-    }
-  }
-  //config_destroy(cf);
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
 };
 
 /*************************************************    MAIN
@@ -854,24 +755,15 @@ void initializer(MatrixXf A,MatrixXf H,MatrixXf Q,MatrixXf R,MatrixXf X0,VectorX
 
 
 int main(int argc, char** argv) {
-<<<<<<< HEAD
-  
 
-  /* Create The Filter */
-  
-=======
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
   ros::init(argc, argv, "seer_node");
   ros::NodeHandle nh;
   AprilTagNode atn;
   int mode,m_mode;
   static struct poptOption options[] = {
       {"mode", 'm', POPT_ARG_INT, &mode, 0,
-<<<<<<< HEAD
        "Set m=1 for calibration, m=0 for testing,m=2 for practical puropse", "NUM"},
-=======
-       "Set m=1 for calibration, m=0 for testing", "NUM"},
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
+
       POPT_AUTOHELP{NULL, 0, 0, NULL, 0, NULL, NULL}};
   POpt popt(NULL, argc, argv, options, 0);
   int c;
@@ -887,12 +779,7 @@ int main(int argc, char** argv) {
                                                  sub_img_right);
   atn.m_mode = mode;
   sync.registerCallback(boost::bind(&AprilTagNode::imgCallback, atn, _1, _2));
-<<<<<<< HEAD
-=======
 
-
-
->>>>>>> 01770477b36f8303be60a031d2918166e19afdd8
   ros::spin();
   return 0;
 }
